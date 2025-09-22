@@ -75,18 +75,8 @@ class ProcessPipeline():
                                                     image_shape=(frames[0].shape[0], frames[0].shape[1]))
 
                 x1, x2, y1, y2 = face_bbox_for_image
-                h, w = frames[idx].shape[:2]
-                x1 = max(0, min(w, int(x1)))
-                x2 = max(0, min(w, int(x2)))
-                y1 = max(0, min(h, int(y1)))
-                y2 = max(0, min(h, int(y2)))
-                w_box = x2 - x1
-                h_box = y2 - y1
-                if w_box <= 16 or h_box <= 16:
-                    face_image = padding_resize(frames[idx], 512, 512)
-                else:
-                    face_image = frames[idx][y1:y2, x1:x2]
-                    face_image = cv2.resize(face_image, (512, 512))
+                face_image = frames[idx][y1:y2, x1:x2]
+                face_image = cv2.resize(face_image, (512, 512))
                 face_images.append(face_image)
 
             logger.info(f"Processing reference image: {refer_image_path}")
@@ -181,18 +171,8 @@ class ProcessPipeline():
                                                     image_shape=(frames[0].shape[0], frames[0].shape[1]))
 
                 x1, x2, y1, y2 = face_bbox_for_image
-                h, w = frames[idx].shape[:2]
-                x1 = max(0, min(w, int(x1)))
-                x2 = max(0, min(w, int(x2)))
-                y1 = max(0, min(h, int(y1)))
-                y2 = max(0, min(h, int(y2)))
-                w_box = x2 - x1
-                h_box = y2 - y1
-                if w_box <= 16 or h_box <= 16:
-                    face_image = padding_resize(frames[idx], 512, 512)
-                else:
-                    face_image = frames[idx][y1:y2, x1:x2]
-                    face_image = cv2.resize(face_image, (512, 512))
+                face_image = frames[idx][y1:y2, x1:x2]
+                face_image = cv2.resize(face_image, (512, 512))
                 face_images.append(face_image)
 
             if retarget_flag:
