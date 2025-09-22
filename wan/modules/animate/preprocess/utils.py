@@ -23,6 +23,9 @@ def get_mask_boxes(mask):
 
 
 def get_aug_mask(body_mask, w_len=10, h_len=20):
+    if not body_mask.any():
+        return body_mask
+    
     body_bbox = get_mask_boxes(body_mask)
 
     bbox_wh = body_bbox[2:4] - body_bbox[0:2]
