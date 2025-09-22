@@ -6,6 +6,7 @@ from einops import  rearrange
 from typing import List
 import numpy as np
 import torch
+import torch._dynamo as dynamo
 import torch.cuda.amp as amp
 import torch.nn as nn
 from diffusers.configuration_utils import ConfigMixin, register_to_config
@@ -361,6 +362,7 @@ class WanAnimateModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
         return x, motion_vec
 
 
+    @dynamo.disable
     def after_transformer_block(self, block_idx, x, motion_vec, motion_masks=None):
         if block_idx % 5 == 0:
             adapter_args = [x, motion_vec, motion_masks, self.use_context_parallel]
