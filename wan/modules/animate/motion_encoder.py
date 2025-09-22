@@ -299,6 +299,7 @@ class Generator(nn.Module):
         self.enc = Encoder(size, style_dim, motion_dim)
         self.dec = Synthesis(motion_dim)
 
+    @torch._dynamo.disable
     def get_motion(self, img):
         #motion_feat = self.enc.enc_motion(img)
         motion_feat = torch.utils.checkpoint.checkpoint((self.enc.enc_motion), img, use_reentrant=False)
