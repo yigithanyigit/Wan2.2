@@ -30,6 +30,7 @@ from .utils.fm_solvers import (
     retrieve_timesteps,
 )
 from .utils.fm_solvers_unipc import FlowUniPCMultistepScheduler
+from cachemoney.caches import get_cache
 
 
 
@@ -308,6 +309,7 @@ class WanAnimate:
         n_prompt="",
         seed=-1,
         offload_model=True,
+        cache=None,
     ):
         r"""
         Generates video frames from input image using diffusion process.
@@ -607,13 +609,21 @@ class WanAnimate:
                     timestep = torch.stack(timestep)
 
                     noise_pred_cond = TensorList(
-                         self.noise_model(TensorList(latent_model_input), t=timestep, **arg_c)
+                         self.noise_model(
+                            TensorList(latent_model_input),
+                            t=timestep,
+                            **arg_c,
+                            cache=cache(step=i, cond_index=0) if cache is not None else None,
+                        )
                     )
 
                     if guide_scale > 1:
                         noise_pred_uncond = TensorList(
                              self.noise_model(
-                                TensorList(latent_model_input), t=timestep, **arg_null
+                                TensorList(latent_model_input),
+                                t=timestep,
+                                **arg_null,
+                                cache=cache(step=i, cond_index=1) if cache is not None else None,
                             )
                         )
                         noise_pred = noise_pred_uncond + guide_scale * (

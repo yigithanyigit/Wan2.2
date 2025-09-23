@@ -36,6 +36,7 @@ from ..model import (
 
 from .face_blocks import FaceEncoder, FaceAdapter
 from .motion_encoder import Generator
+from cachemoney.caches import DiffusionCacheContext
 
 class HeadAnimate(Head):
 
@@ -378,6 +379,7 @@ class WanAnimateModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
         clip_fea,
         context,
         seq_len,
+        cache: DiffusionCacheContext | None = None,
         y=None,
         pose_latents=None, 
         face_pixel_values=None
@@ -386,6 +388,8 @@ class WanAnimateModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
         device = self.patch_embedding.weight.device
         if self.freqs.device != device:
             self.freqs = self.freqs.to(device)
+
+        cache = cache or DiffusionCacheContext()
 
         if y is not None:
             x = [torch.cat([u, v], dim=0) for u, v in zip(x, y)]
@@ -437,9 +441,16 @@ class WanAnimateModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
         if self.use_context_parallel:
             x = torch.chunk(x, get_world_size(), dim=1)[get_rank()]
 
-        for idx, block in enumerate(self.blocks):
-            x = block(x, **kwargs)
-            x = self.after_transformer_block(idx, x, motion_vec)
+        cache.set(x)
+
+        if cache.residual is not None:
+            x = x + cache.residual
+        else:
+            for idx, block in enumerate(self.blocks):
+                x = block(x, **kwargs)
+                x = self.after_transformer_block(idx, x, motion_vec)
+
+            cache.update(x)
 
         # head
         x = self.head(x, e)
