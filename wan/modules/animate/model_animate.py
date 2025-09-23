@@ -447,7 +447,12 @@ class WanAnimateModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
         else:
             for idx, block in enumerate(self.blocks):
                 x = block(x, **kwargs)
+            
+            cache.update(x)
+
+            for idx, block in enumerate(self.blocks):
                 x = self.after_transformer_block(idx, x, motion_vec)
+
 
         # head
         x = self.head(x, e)
