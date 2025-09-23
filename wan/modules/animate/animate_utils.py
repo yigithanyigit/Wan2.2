@@ -39,6 +39,9 @@ class TensorList(object):
     def clone(self, *args, **kwargs):
         return TensorList([u.clone(*args, **kwargs) for u in self.tensors])
     
+    def as_tensor(self):
+        return torch.stack(self.tensors, dim=0)
+    
     def size(self, dim):
         assert dim == 0, 'only support get the 0th size'
         return len(self.tensors)

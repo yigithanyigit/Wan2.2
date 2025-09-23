@@ -390,7 +390,6 @@ class WanAnimateModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
             self.freqs = self.freqs.to(device)
 
         cache = cache or DiffusionCacheContext()
-        cache.set(x)
 
         if y is not None:
             x = [torch.cat([u, v], dim=0) for u, v in zip(x, y)]
@@ -442,16 +441,18 @@ class WanAnimateModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
         if self.use_context_parallel:
             x = torch.chunk(x, get_world_size(), dim=1)[get_rank()]
 
+        cache.set(x)
+
         if cache.residual is not None:
            x = x + cache.residual
         else:
             for idx, block in enumerate(self.blocks):
                 x = block(x, **kwargs)
-            
-            cache.update(x)
 
             for idx, block in enumerate(self.blocks):
                 x = self.after_transformer_block(idx, x, motion_vec)
+
+            cache.update(x)
 
 
         # head
