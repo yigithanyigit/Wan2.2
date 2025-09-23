@@ -36,6 +36,9 @@ class TensorList(object):
     def to(self, *args, **kwargs):
         return TensorList([u.to(*args, **kwargs) for u in self.tensors])
     
+    def clone(self, *args, **kwargs):
+        return TensorList([u.clone(*args, **kwargs) for u in self.tensors])
+    
     def size(self, dim):
         assert dim == 0, 'only support get the 0th size'
         return len(self.tensors)
