@@ -76,6 +76,9 @@ class ProcessPipeline():
 
                 x1, x2, y1, y2 = face_bbox_for_image
                 face_image = frames[idx][y1:y2, x1:x2]
+                if face_image.size == 0 or face_image.shape[0] == 0 or face_image.shape[1] == 0:
+                    logger.warning(f"Skipping frame {idx}: face detection failed")
+                    continue
                 face_image = cv2.resize(face_image, (512, 512))
                 face_images.append(face_image)
 
@@ -172,6 +175,9 @@ class ProcessPipeline():
 
                 x1, x2, y1, y2 = face_bbox_for_image
                 face_image = frames[idx][y1:y2, x1:x2]
+                if face_image.size == 0 or face_image.shape[0] == 0 or face_image.shape[1] == 0:
+                    logger.warning(f"Skipping frame {idx}: face detection failed")
+                    continue
                 face_image = cv2.resize(face_image, (512, 512))
                 face_images.append(face_image)
 
