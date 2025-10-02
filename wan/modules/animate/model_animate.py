@@ -409,13 +409,17 @@ class WanAnimateModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
         ])
 
         # time embeddings
-        torch._dynamo.graph_break()
-        with amp.autocast(dtype=torch.float32):
-            e = self.time_embedding(
-                sinusoidal_embedding_1d(self.freq_dim, t).float()
-            )
-            e0 = self.time_projection(e).unflatten(1, (6, self.dim))
-            assert e.dtype == torch.float32 and e0.dtype == torch.float32
+        @dynamo.disable
+        def compute_time_embeddings():
+            with amp.autocast(dtype=torch.float32):
+                e = self.time_embedding(
+                    sinusoidal_embedding_1d(self.freq_dim, t).float()
+                )
+                e0 = self.time_projection(e).unflatten(1, (6, self.dim))
+                assert e.dtype == torch.float32 and e0.dtype == torch.float32
+            return e, e0
+        
+        e, e0 = compute_time_embeddings()
 
         # context
         context_lens = None
