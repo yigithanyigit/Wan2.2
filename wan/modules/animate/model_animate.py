@@ -409,7 +409,8 @@ class WanAnimateModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
         ])
 
         # time embeddings
-        with torch.compiler.disable(), amp.autocast(dtype=torch.float32):
+        torch._dynamo.graph_break()
+        with amp.autocast(dtype=torch.float32):
             e = self.time_embedding(
                 sinusoidal_embedding_1d(self.freq_dim, t).float()
             )
