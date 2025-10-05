@@ -107,7 +107,7 @@ def flash_attention(
             max_seqlen_k=lk,
             softmax_scale=softmax_scale,
             causal=causal,
-            deterministic=deterministic)[0].unflatten(0, (b, lq))
+            deterministic=deterministic).unflatten(0, (b, lq)) # As per https://github.com/Wan-Video/Wan2.2/pull/64/commits/070614bc8b74b7d9bccbb182cebaf4ddc7f8fa82
     else:
         assert FLASH_ATTN_2_AVAILABLE
         x = flash_attn.flash_attn_varlen_func(
