@@ -15,7 +15,7 @@ except:
 from decord import VideoReader
 from pose2d import Pose2d
 from pose2d_utils import AAPoseMeta
-from utils import resize_by_area, get_frame_indices, padding_resize, get_face_bboxes, get_aug_mask, get_mask_body_img
+from utils import resize_by_area, get_frame_indices, padding_resize, get_face_bboxes, get_aug_mask, get_mask_body_img, InvalidBBOXException
 from human_visualization import draw_aapose_by_meta_new
 from retarget_pose import get_retarget_pose
 import sam2.modeling.sam.transformer as transformer
@@ -71,8 +71,12 @@ class ProcessPipeline():
 
             face_images = []
             for idx, meta in enumerate(tpl_pose_metas):
-                face_bbox_for_image = get_face_bboxes(meta['keypoints_face'][:, :2], scale=1.3,
-                                                    image_shape=(frames[0].shape[0], frames[0].shape[1]))
+                try:
+                    face_bbox_for_image = get_face_bboxes(meta['keypoints_face'][:, :2], scale=1.3,
+                                                        image_shape=(frames[0].shape[0], frames[0].shape[1]))
+                except InvalidBBOXException:
+                    logger.warning(f"Frame {idx} has invalid face bounding box, skipping this frame.")
+                    continue
 
                 x1, x2, y1, y2 = face_bbox_for_image
                 face_image = frames[idx][y1:y2, x1:x2]
@@ -170,8 +174,13 @@ class ProcessPipeline():
 
             face_images = []
             for idx, meta in enumerate(tpl_pose_metas):
-                face_bbox_for_image = get_face_bboxes(meta['keypoints_face'][:, :2], scale=1.3,
-                                                    image_shape=(frames[0].shape[0], frames[0].shape[1]))
+                try:
+                    face_bbox_for_image = get_face_bboxes(meta['keypoints_face'][:, :2], scale=1.3,
+                                                        image_shape=(frames[0].shape[0], frames[0].shape[1]))
+                except InvalidBBOXException:
+                    logger.warning(f"Frame {idx} has invalid face bounding box, skipping this frame.")
+                    continue
+                    
 
                 x1, x2, y1, y2 = face_bbox_for_image
                 face_image = frames[idx][y1:y2, x1:x2]

@@ -200,6 +200,9 @@ def get_frame_indices(frame_num, video_fps, clip_length, train_fps):
 
     return frame_indices.tolist()
 
+class InvalidBBOXException(Exception):
+    pass
+
 
 def get_face_bboxes(kp2ds, scale, image_shape):
     h, w = image_shape
@@ -207,6 +210,9 @@ def get_face_bboxes(kp2ds, scale, image_shape):
 
     min_x, min_y = np.min(kp2ds_face, axis=0)
     max_x, max_y = np.max(kp2ds_face, axis=0)
+
+    if min_x >= max_x or min_y >= max_y:
+        raise InvalidBBOXException("Invalid bounding box calculated from keypoints.")
 
     initial_width = max_x - min_x
     initial_height = max_y - min_y
