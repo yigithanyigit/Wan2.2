@@ -71,8 +71,12 @@ class ProcessPipeline():
 
             face_images = []
             for idx, meta in enumerate(tpl_pose_metas):
-                face_bbox_for_image = get_face_bboxes(meta['keypoints_face'][:, :2], scale=1.3,
-                                                    image_shape=(frames[0].shape[0], frames[0].shape[1]))
+                try:
+                    face_bbox_for_image = get_face_bboxes(meta['keypoints_face'][:, :2], scale=1.3,
+                                                        image_shape=(frames[0].shape[0], frames[0].shape[1]))
+                except InvalidBBOXException:
+                    logger.warning(f"Frame {idx} has invalid face bounding box, skipping this frame.")
+                    continue
 
                 x1, x2, y1, y2 = face_bbox_for_image
                 face_image = frames[idx][y1:y2, x1:x2]
